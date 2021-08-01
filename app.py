@@ -115,6 +115,7 @@ def handle_message(event):
              ]
          )
      )
+        line_bot_api.reply_message(event.reply_token, buttons_template_message)
     # elif re.match('美元匯率',message):
     #     Confirm_template = TemplateSendMessage(
     #     alt_text='目錄 template',
