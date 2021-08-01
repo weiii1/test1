@@ -115,8 +115,8 @@ def handle_message(event):
              ]
          )
      )
-    elif event.message.text == "匯率兌換":
-        print("Confirm template")       
+    elif event.message.text == "Confirm template":
+        print("匯率兌換")       
         Confirm_template = TemplateSendMessage(
         alt_text='目錄 template',
         template=ConfirmTemplate(
