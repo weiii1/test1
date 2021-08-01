@@ -9,7 +9,7 @@ Line Bot聊天機器人
 Line Bot機器人串接與測試
 """
 #載入LineBot所需要的套件
-from flask import Flask, request, abort
+from flask import Flask, request, abort,jsonify
 
 from linebot import (
     LineBotApi, WebhookHandler
@@ -18,16 +18,29 @@ from linebot.exceptions import (
     InvalidSignatureError
 )
 from linebot.models import *
-import re
-app = Flask(__name__)
 
+app = Flask(__name__)
+import re
+import requests
+import os, sys,json
+cities = ['基隆市','嘉義市','臺北市','嘉義縣','新北市','臺南市','桃園縣','高雄市','新竹市','屏東縣','新竹縣','臺東縣','苗栗縣','花蓮縣','臺中市','宜蘭縣','彰化縣','澎湖縣','南投縣','金門縣','雲林縣','連江縣']
+ww=1
 # 必須放上自己的Channel Access Token
 line_bot_api = LineBotApi('WXJfIVSha2Urij1QZCDXsIDQQAXy5TSJh2hPvOnAgPIbXmt2jLxinW4ezxmOqPoSvzSQDM0OjWv3giTT2UVdVfPt5qzEia9GhW6PXKXzd5i9+Zta2JOrionqkFO3v+TWmMJyX+xtwORUvr5JsoZxcgdB04t89/1O/w1cDnyilFU=')
 # 必須放上自己的Channel Secret
 handler = WebhookHandler('48e4c8924437e09e4902b5e500f43846')
 
 line_bot_api.push_message('U6384f61cb5051c046ed3e7eab32d21b4', TextSendMessage(text='你可以開始了'))
-
+def get(city):
+    token = 'CWB-B0A62AE7-CF1D-4C83-BF46-7E082EF1FC9A'
+    url = 'https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=' + token + '&format=JSON&locationName=' + str(city)
+    Data = requests.get(url)
+    Data = (json.loads(Data.text,encoding='utf-8'))['records']['location'][0]['weatherElement']
+    res = [[] , [] , []]
+    for j in range(3):
+        for i in Data:
+            res[j].append(i['time'][j])
+    return res
 
 # 監聽所有來自 /callback 的 Post Request
 @app.route("/callback", methods=['POST'])
@@ -48,68 +61,108 @@ def callback():
 
     return 'OK'
 
+
  
 #訊息傳遞區塊
 ##### 基本上程式編輯都在這個function #####
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-     message = text=event.message.text
-     if re.match('告訴我秘密',message):
-         carousel_template_message = TemplateSendMessage(
-             alt_text='免費教學影片',
-             template=CarouselTemplate(
-                 columns=[
-                     CarouselColumn(
-                         thumbnail_image_url='https://i.imgur.com/wpM584d.jpg',
-                         title='Python基礎教學',
-                         text='萬丈高樓平地起',
-                         actions=[
-                             MessageAction(
-                                 label='教學內容',
-                                 text='拆解步驟詳細介紹安裝並使用Anaconda、Python、Spyder、VScode…'
-                             ),
-                             URIAction(
-                                 label='馬上查看',
-                                 uri='https://marketingliveincode.com/?page_id=270'
-                             )
-                         ]
-                     ),
-                     CarouselColumn(
-                         thumbnail_image_url='https://i.imgur.com/W7nI6fg.jpg',
-                         title='Line Bot聊天機器人',
-                         text='台灣最廣泛使用的通訊軟體',
-                         actions=[
-                             MessageAction(
-                                 label='教學內容',
-                                 text='Line Bot申請與串接'
-                             ),
-                             URIAction(
-                                 label='馬上查看',
-                                 uri='https://marketingliveincode.com/?page_id=2532'
-                             )
-                         ]
-                     ),
-                     CarouselColumn(
-                         thumbnail_image_url='https://i.imgur.com/l7rzfIK.jpg',
-                         title='Telegram Bot聊天機器人',
-                         text='唯有真正的方便，能帶來意想不到的價值',
-                         actions=[
-                             MessageAction(
-                                 label='教學內容',
-                                 text='Telegrame申請與串接'
-                             ),
-                             URIAction(
-                                 label='馬上查看',
-                                 uri='https://marketingliveincode.com/?page_id=2648'
-                             )
-                         ]
-                     )
-                 ]
-             )
+    resp = requests.get('https://tw.rter.info/capi.php')
+    currency_data = resp.json()
+    usd_to_twd = currency_data['USDTWD']['Exrate']
+    usd_to_jpy = currency_data['USDJPY']['Exrate']
+    usd_to_eur = currency_data['USDEUR']['Exrate']
+    usd_to_krw = currency_data['USDKRW']['Exrate']
+    usd_to_cny = currency_data['USDCNY']['Exrate']
+    usdtwd=float(usd_to_twd)
+    usdjpy=float(usd_to_jpy)
+    usdeur=float(usd_to_eur)
+    usdkrw=float(usd_to_krw)
+    usdcny=float(usd_to_cny)
+    twdjpy=usdjpy/usdtwd
+    twdeur=usdeur/usdtwd
+    twdkrw=usdkrw/usdtwd
+    twdcny=usdcny/usdtwd
+    twdusd=1/usdtwd
+    twdjpy=(round(twdjpy,5))
+    twdeur=(round(twdeur,5))
+    twdcny=(round(twdcny,5))
+    ss= event.message.text 
+    message = event.message.text
+ 
+    if re.match('匯率',message):
+        buttons_template_message = TemplateSendMessage(
+         alt_text='這是LineBot',
+         template=ButtonsTemplate(
+             thumbnail_image_url='https://i.imgur.com/wpM584d.jpg',title='請選擇幣別',text='幣別',
+             actions=[
+                  MessageAction(
+                     label='美元',
+                     text='美元匯率'
+                 ),
+                 MessageAction(
+                     label='歐元',
+                     text='歐元匯率'
+                 ),
+                 MessageAction(
+                     label='日元',
+                     text='日元匯率'
+                 ),
+                 MessageAction(
+                     label='人民幣',
+                     text='人民幣匯率'
+                 )
+             ]
          )
-         line_bot_api.reply_message(event.reply_token, carousel_template_message)
-     else:
-         line_bot_api.reply_message(event.reply_token, TextSendMessage(message))
+     )
+        line_bot_api.reply_message(event.reply_token, buttons_template_message)
+    elif re.match('美元匯率',message):
+        line_bot_api.reply_message(event.reply_token,TextSendMessage(text=f'台幣 TWD 對美金 USD：1:{twdusd}'))
+    elif re.match('歐元匯率',message):
+        line_bot_api.reply_message(event.reply_token,TextSendMessage(text=f'台幣 TWD 對歐元 EUR：1:{twdeur}'))
+    elif re.match('日元匯率',message):
+        line_bot_api.reply_message(event.reply_token,TextSendMessage(text=f'台幣 TWD 對日幣 JPY：1:{twdjpy}'))
+    elif re.match('韓元匯率',message):
+        line_bot_api.reply_message(event.reply_token,TextSendMessage(text=f'台幣 TWD 對韓元 KRW：1:{twdkrw}'))
+    elif re.match('人民幣匯率',message):
+        line_bot_api.reply_message(event.reply_token,TextSendMessage(text=f'台幣 TWD 對人民幣 CNY：1:{twdcny}'))
+    #以上為匯率功能#以上為匯率功能#以上為匯率功能#以上為匯率功能#以上為匯率功能#以上為匯率功能
+    elif re.match('記帳功能',message):
+        line_bot_api.reply_message(event.reply_token,TextSendMessage('老子懶的記'))
+    elif re.match('翻譯功能',message):
+        line_bot_api.reply_message(event.reply_token,TextSendMessage('老子懶的記'))
+    elif re.match('查詢天氣功能',message):
+        line_bot_api.reply_message(event.reply_token,TextSendMessage('請輸入城市名稱'))
+        print(message)
+    elif (ss in cities):
+       # line_bot_api.reply_message(event.reply_token,TextSendMessage('aaaaa12332233'))
+        reply_token = event.reply_token
+        city = ss
+        city = city.replace('台','臺')
+        print(city)
+        res=get(city)
+        line_bot_api.reply_message(reply_token, TemplateSendMessage(
+    alt_text = city + '未來 36 小時天氣預測',
+    template = CarouselTemplate(
+        columns = [
+            CarouselColumn(
+                thumbnail_image_url = 'https://i.imgur.com/Ex3Opfo.png',
+                title = '{} ~ {}'.format(res[0][0]['startTime'][5:-3],res[0][0]['endTime'][5:-3]),
+                text = '天氣狀況 {}\n溫度 {} ~ {} °C\n降雨機率 {}'.format(data[0]['parameter']['parameterName'],data[2]['parameter']['parameterName'],data[4]['parameter']['parameterName'],data[1]['parameter']['parameterName']),
+                actions = [
+                    URIAction(
+                        label = '詳細內容',
+                        uri = 'https://www.cwb.gov.tw/V8/C/W/County/index.html'
+                    )
+                ]
+            )for data in res
+        ]
+    )
+   ))
+    else:
+        line_bot_api.reply_message(event.reply_token, TextSendMessage('沒有此指令'))
+
+    
 #主程式
 import os
 if __name__ == "__main__":
