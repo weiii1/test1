@@ -115,22 +115,22 @@ def handle_message(event):
              ]
          )
      )
-    elif event.message.text == "Confirm template":
+    elif event.message.text == "匯率兌換":
         print("Confirm template")       
         Confirm_template = TemplateSendMessage(
         alt_text='目錄 template',
         template=ConfirmTemplate(
             title='這是ConfirmTemplate',
-            text='這就是ConfirmTemplate,用於兩種按鈕選擇',
+            text='匯率兌換',
             actions=[                              
                 PostbackTemplateAction(
-                    label='Y',
-                    text='Y',
+                    label='美轉台',
+                    text='666',
                     data='action=buy&itemid=1'
                 ),
                 MessageTemplateAction(
-                    label='N',
-                    text='N'
+                    label='台轉美',
+                    text='666'
                 )
             ]
         )
