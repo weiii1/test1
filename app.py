@@ -19,8 +19,6 @@ from linebot.exceptions import (
 )
 from linebot.models import *
 
-from googletrans import Translator
-
 app = Flask(__name__)
 import re
 import requests
