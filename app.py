@@ -19,6 +19,8 @@ from linebot.exceptions import (
 )
 from linebot.models import *
 
+from googletrans import Translator
+
 app = Flask(__name__)
 import re
 import requests
@@ -178,6 +180,7 @@ def handle_message(event):
    ))
     else:
         line_bot_api.reply_message(event.reply_token, TextSendMessage('沒有此指令'))
+        
 
     
 #主程式
