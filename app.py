@@ -117,24 +117,7 @@ def handle_message(event):
      )
         line_bot_api.reply_message(event.reply_token, buttons_template_message)
     elif re.match('美元匯率',message):
-        Confirm_template = TemplateSendMessage(
-        alt_text='目錄 template',
-        template=ConfirmTemplate(
-            title='這是ConfirmTemplateaaaaaa',
-            text='adasdasds用於兩種按鈕選擇bbbb',
-            actions=[                              
-                MessageTemplateAction(
-                    label='台幣美金',
-                    text='請輸入兌換之台幣金額'
-                ),
-                MessageTemplateAction(
-                    label='美金台幣',
-                    text='請輸入兌換之美金金額'
-                )
-            ]
-        )
-    )
-        line_bot_api.reply_message(event.reply_token,Confirm_template)
+        line_bot_api.reply_message(event.reply_token,TextSendMessage(text=f'台幣 TWD 對美元 EUR：1:{twdusd}'))
     elif re.match('歐元匯率',message):
         line_bot_api.reply_message(event.reply_token,TextSendMessage(text=f'台幣 TWD 對歐元 EUR：1:{twdeur}'))
     elif re.match('日元匯率',message):
