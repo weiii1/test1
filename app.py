@@ -19,6 +19,8 @@ from linebot.exceptions import (
 )
 from linebot.models import *
 
+from googletrans import Translator
+
 app = Flask(__name__)
 import re
 import requests
@@ -159,6 +161,32 @@ def handle_message(event):
         ]
     )
    ))
+# def translate_text(text,dest='en'):
+#     """以google翻譯將text翻譯為目標語言
+
+#     :param text: 要翻譯的字串，接受UTF-8編碼。
+#     :param dest: 要翻譯的目標語言，參閱googletrans.LANGCODES語言列表。
+#     """
+#     translator = Translator()
+#     result = translator.translate(text, dest).text
+#     return result
+
+# @handler.add(MessageEvent, message=TextMessage)
+# def handle_message(event):
+#     if event.source.user_id =='Udeadbeefdeadbeefdeadbeefdeadbeef':
+#         return 'OK'
+#     if event.message.text[:3] == "@翻英":
+#         content = translate_text(event.message.text[3:], "en")
+#         message = TextSendMessage(text=content)
+#         line_bot_api.reply_message(event.reply_token, message)
+#     if event.message.text[:3] == "@翻日":
+#         content = translate_text(event.message.text[3:] , "ja")
+#         message = TextSendMessage(text=content)
+#         line_bot_api.reply_message(event.reply_token, message)
+#     if event.message.text[:3] == "@翻中":
+#         content = translate_text(event.message.text[3:] , "zh-tw")
+#         message = TextSendMessage(text=content)
+#         line_bot_api.reply_message(event.reply_token, message)
     else:
         line_bot_api.reply_message(event.reply_token, TextSendMessage('沒有此指令'))
         
